@@ -3,7 +3,7 @@ import cv2
 import pandas as pd
 from sklearn.cluster import KMeans
 import numpy as np
-
+from ultralytics import YOLO
 from scipy.interpolate import griddata
 
 def complete_grid(crossings, image_shape):
@@ -456,6 +456,30 @@ def df_to_fen(df):
         fen_rows.append(row_str)
         
     return "/".join(fen_rows)
+
+def load_models():
+    """
+    Loads the trained models for board detection and piece detection.
+    
+    Returns:
+        board_model (YOLO): The trained YOLO model for detecting board intersections.
+        piece_model (YOLO): The trained YOLO model for detecting chess pieces.
+    """
+    print("Loading trained models...")
+
+    board_model_path = "runs/detect_board/train/weights/best.pt"
+    piece_model_path = "runs/detect_pieces/train/weights/best.pt"
+
+    try:
+        board_model = YOLO(board_model_path)  # Load the trained board model
+        piece_model = YOLO(piece_model_path)  # Load the trained piece model
+        print("Models loaded successfully!")
+    except Exception as e:
+        print(f"Error loading models: {e}")
+        raise
+
+    return board_model, piece_model
+
 
 
 if __name__ == "__main__":

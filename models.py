@@ -1,4 +1,6 @@
 from ultralytics import YOLO
+from chess_utils import load_models
+
 import torch
 
 
