@@ -458,26 +458,21 @@ def df_to_fen(df):
     return "/".join(fen_rows)
 
 def load_models():
-    """
-    Loads the trained models for board detection and piece detection.
-    
-    Returns:
-        board_model (YOLO): The trained YOLO model for detecting board intersections.
-        piece_model (YOLO): The trained YOLO model for detecting chess pieces.
-    """
-    print("Loading trained models...")
+    # Correct paths based on your git ls-files output
+    board_model_path = "runs/detect_board/train/best.pt"
+    piece_model_path = "runs/detect_pieces/train/best.pt"
 
-    board_model_path = "runs/detect_board/train/weights/best.pt"
-    piece_model_path = "runs/detect_pieces/train/weights/best.pt"
+    # Ensure the files exist before loading
+    if not os.path.exists(board_model_path):
+        raise FileNotFoundError(f"Board model file not found: {board_model_path}")
+    if not os.path.exists(piece_model_path):
+        raise FileNotFoundError(f"Piece model file not found: {piece_model_path}")
 
-    try:
-        board_model = YOLO(board_model_path)  # Load the trained board model
-        piece_model = YOLO(piece_model_path)  # Load the trained piece model
-        print("Models loaded successfully!")
-    except Exception as e:
-        print(f"Error loading models: {e}")
-        raise
+    print(f"Loading board model from {board_model_path}")
+    print(f"Loading piece model from {piece_model_path}")
 
+    board_model = YOLO(board_model_path)
+    piece_model = YOLO(piece_model_path)
     return board_model, piece_model
 
 
