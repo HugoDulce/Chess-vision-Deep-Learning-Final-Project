@@ -2,58 +2,65 @@ import streamlit as st
 import cv2
 import numpy as np
 from PIL import Image
-import chess_utils  # Your chess processing script
-import models  # Your model loading script
-
-# 🏆 Streamlit Page Config
-st.set_page_config(page_title="Chess Vision App", layout="wide")
-
-# 🏆 Title & Description
-st.title("♟️ Chess Vision AI")
-st.write("Upload a chessboard image to detect the board and pieces using AI.")
-
-# 🚀 Cache Model Loading to Avoid Reloading
-@st.cache_resource
-def load_models():
-    return models.load_models()
+from ultralytics import YOLO
+import chess_utils  # Ensure this is correctly imported
 
 # Load YOLO models
-board_model, piece_model = load_models()
+board_model, piece_model = chess_utils.load_models()
 
-# 📤 File Upload
-uploaded_file = st.file_uploader("📤 Upload a chessboard image", type=["jpg", "png", "jpeg"])
+# Streamlit App Title
+st.title("Chess Board & Piece Detection")
+
+# Upload Image
+uploaded_file = st.file_uploader("Upload a Chessboard Image", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
-    # 🖼️ Convert uploaded image to OpenCV format
+    # Convert to OpenCV image format
     image = Image.open(uploaded_file)
-    image = np.array(image)
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # Convert PIL Image to OpenCV format
+    image = np.array(image)  # Convert to NumPy array for OpenCV processing
 
-    # 🎨 Display uploaded image
-    st.image(image, caption="📷 Uploaded Image", use_column_width=True, channels="BGR")
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    try:
-        # 🔄 Run YOLO models directly since `process_image()` does not exist
-        st.write("🔄 Detecting chessboard...")
-        board_detections = board_model.predict(image)
+    # Detect the Chessboard
+    st.write("🔄 Detecting chessboard...")
+    board_results = board_model(image)
 
-        st.write("🔄 Detecting chess pieces...")
-        piece_detections = piece_model.predict(image)
+    # Detect Chess Pieces
+    st.write("🔄 Detecting chess pieces...")
+    piece_results = piece_model(image)
 
-        # ✅ Debugging Information
-        st.write(f"📝 Board Detections: {board_detections}")
-        st.write(f"📝 Piece Detections: {piece_detections}")
+    # Debugging Output
+    st.write("📝 Board Detections:", board_results)
+    st.write("📝 Piece Detections:", piece_results)
 
-        # 🎯 Draw Detected Chessboard and Pieces
-        processed_image = chess_utils.draw_detections(image, board_detections, piece_detections)
+    # Extracting Chessboard Corners
+    if len(board_results) > 0 and board_results[0].boxes is not None:
+        board_detections = board_results[0].boxes
+        crossings = [(int(x), int(y)) for box in board_detections for x, y, _, _ in box.xywh.cpu().numpy()]
 
-        # 🖼️ Show Processed Image with Detections
-        st.image(processed_image, caption="🧩 Detected Chessboard & Pieces", use_column_width=True, channels="BGR")
+        if len(crossings) > 0:
+            # Generate a 7x7 grid of intersections
+            grid = chess_utils.complete_grid(crossings, image.shape)
 
-    except AttributeError as e:
-        st.error("⚠️ Error: Check `chess_utils.py` and `models.py` for missing functions.")
-        st.write(f"🔍 Debug Info: {e}")
+            # Draw the grid on the image
+            image_with_grid, horizontal_lines, vertical_lines = chess_utils.draw_infinite_grid(image, grid)
 
-    except Exception as e:
-        st.error("⚠️ Unexpected Error. Check logs for details.")
-        st.write(f"🔍 Debug Info: {e}")
+            # Display the result
+            st.image(image_with_grid, caption="Detected Chessboard Grid", use_column_width=True)
+        else:
+            st.error("⚠️ Chessboard detected, but no valid crossings found.")
+    else:
+        st.error("⚠️ No chessboard detected. Try another image.")
+
+    # Processing Piece Detections
+    if len(piece_results) > 0 and piece_results[0].boxes is not None:
+        piece_detections = piece_results[0].boxes
+        if len(piece_detections) > 0:
+            st.success("✅ Chess pieces detected!")
+        else:
+            st.error("⚠️ No chess pieces detected.")
+    else:
+        st.error("⚠️ No chess pieces detected.")
+
+    st.write("✅ Processing Complete!")
+
