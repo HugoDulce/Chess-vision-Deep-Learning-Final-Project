@@ -444,7 +444,7 @@ def df_to_fen(df):
         for file in df.columns:
             piece = df.loc[rank, file]
             if piece == "" or pd.isna(piece):
-e                empty_count += 1
+                empty_count += 1
             else:
                 if empty_count:
                     row_str += str(empty_count)
@@ -456,6 +456,8 @@ e                empty_count += 1
         fen_rows.append(row_str)
         
     return "/".join(fen_rows)
+
+
 
 def load_models():
     # Correct paths based on your git ls-files output
