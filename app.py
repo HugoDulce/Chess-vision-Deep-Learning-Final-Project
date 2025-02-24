@@ -5,7 +5,6 @@ from PIL import Image
 from ultralytics import YOLO
 import chess_utils  # Ensure this file is in the same directory
 
-
 # Load YOLO models
 st.write("🔄 Loading YOLO models...")
 try:
@@ -14,11 +13,11 @@ try:
 except FileNotFoundError as e:
     st.error(f"⚠️ Model file missing: {e}")
     st.stop()
-    
+
 # Streamlit App Title
 st.title("♟️ Chess Board & Piece Detection")
 
-# Upload Image
+# Upload Image (ONLY ONCE)
 uploaded_file = st.file_uploader("📂 Upload a Chessboard Image", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
@@ -33,6 +32,7 @@ if uploaded_file is not None:
         image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
     
     st.image(image, caption="📷 Uploaded Image", use_column_width=True)
+
     # Detect the Chessboard
     st.write("🔄 Detecting chessboard...")
     try:
