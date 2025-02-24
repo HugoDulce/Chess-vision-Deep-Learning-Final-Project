@@ -5,21 +5,28 @@ from PIL import Image
 from ultralytics import YOLO
 import chess_utils  # Ensure this file is in the same directory
 
+
 # Load YOLO models
-board_model, piece_model = chess_utils.load_models()
+st.write("🔄 Loading YOLO models...")
+try:
+    board_model, piece_model = chess_utils.load_models()
+    st.success("✅ Models loaded successfully!")
+except FileNotFoundError as e:
+    st.error(f"⚠️ Model file missing: {e}")
+    st.stop()
 
 # Streamlit App Title
-st.title("Chess Board & Piece Detection")
+st.title("♟️ Chess Board & Piece Detection")
 
 # Upload Image
-uploaded_file = st.file_uploader("Upload a Chessboard Image", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("📂 Upload a Chessboard Image", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
     # Convert to OpenCV image format
     image = Image.open(uploaded_file)
     image = np.array(image)  # Convert to NumPy array for OpenCV processing
 
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="📷 Uploaded Image", use_column_width=True)
 
     # Detect the Chessboard
     st.write("🔄 Detecting chessboard...")
@@ -34,18 +41,17 @@ if uploaded_file is not None:
     st.write("📝 Piece Detections:", piece_results)
 
     # Extracting Chessboard Corners
-    board_detections = board_results[0].boxes  # Get detected boxes
-    piece_detections = piece_results[0].boxes  # Get detected pieces
+    board_detections = board_results[0].boxes if board_results else None
+    piece_detections = piece_results[0].boxes if piece_results else None
 
-    if board_detections is None or len(board_detections) == 0:
+    if not board_detections or len(board_detections) == 0:
         st.error("⚠️ No chessboard detected. Try another image.")
     else:
-        # Extract board corners
-        crossings = []
-        for box in board_detections:
-            x, y, w, h = box.xywh[0]  # Convert box to (x, y)
-            crossings.append((int(x), int(y)))
+        crossings = [(int(box.xywh[0][0]), int(box.xywh[0][1])) for box in board_detections]
 
+        if len(crossings) < 10:
+            st.warning("⚠️ Low number of board crossings detected. Grid estimation may be inaccurate.")
+        
         # Generate a 7x7 grid of intersections
         grid = chess_utils.complete_grid(crossings, image.shape)
 
@@ -53,12 +59,20 @@ if uploaded_file is not None:
         image_with_grid, horizontal_lines, vertical_lines = chess_utils.draw_infinite_grid(image, grid)
 
         # Display the result
-        st.image(image_with_grid, caption="Detected Chessboard Grid", use_column_width=True)
+        st.image(image_with_grid, caption="🟩 Detected Chessboard Grid", use_column_width=True)
 
-    if piece_detections is None or len(piece_detections) == 0:
+    if not piece_detections or len(piece_detections) == 0:
         st.error("⚠️ No chess pieces detected.")
     else:
         st.success("✅ Chess pieces detected!")
 
-    st.write("✅ Processing Complete!")
+        # Convert to DataFrame for chessboard representation
+        board_df = chess_utils.create_chessboard_dataframe(piece_detections, horizontal_lines, vertical_lines)
+        board_df = chess_utils.reorient_board(board_df)  # Ensure proper orientation
 
+        # Convert to FEN notation
+        fen_string = chess_utils.df_to_fen(board_df)
+        st.write("📜 FEN Representation:")
+        st.code(fen_string, language="text")
+
+    st.write("✅ Processing Complete!")
