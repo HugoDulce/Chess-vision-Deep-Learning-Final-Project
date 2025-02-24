@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
-import chess_utils  # Ensure this is correctly imported
+import chess_utils  # Ensure this file is in the same directory
 
 # Load YOLO models
 board_model, piece_model = chess_utils.load_models()
@@ -34,33 +34,31 @@ if uploaded_file is not None:
     st.write("📝 Piece Detections:", piece_results)
 
     # Extracting Chessboard Corners
-    if len(board_results) > 0 and board_results[0].boxes is not None:
-        board_detections = board_results[0].boxes
-        crossings = [(int(x), int(y)) for box in board_detections for x, y, _, _ in box.xywh.cpu().numpy()]
+    board_detections = board_results[0].boxes  # Get detected boxes
+    piece_detections = piece_results[0].boxes  # Get detected pieces
 
-        if len(crossings) > 0:
-            # Generate a 7x7 grid of intersections
-            grid = chess_utils.complete_grid(crossings, image.shape)
-
-            # Draw the grid on the image
-            image_with_grid, horizontal_lines, vertical_lines = chess_utils.draw_infinite_grid(image, grid)
-
-            # Display the result
-            st.image(image_with_grid, caption="Detected Chessboard Grid", use_column_width=True)
-        else:
-            st.error("⚠️ Chessboard detected, but no valid crossings found.")
-    else:
+    if board_detections is None or len(board_detections) == 0:
         st.error("⚠️ No chessboard detected. Try another image.")
-
-    # Processing Piece Detections
-    if len(piece_results) > 0 and piece_results[0].boxes is not None:
-        piece_detections = piece_results[0].boxes
-        if len(piece_detections) > 0:
-            st.success("✅ Chess pieces detected!")
-        else:
-            st.error("⚠️ No chess pieces detected.")
     else:
+        # Extract board corners
+        crossings = []
+        for box in board_detections:
+            x, y, w, h = box.xywh[0]  # Convert box to (x, y)
+            crossings.append((int(x), int(y)))
+
+        # Generate a 7x7 grid of intersections
+        grid = chess_utils.complete_grid(crossings, image.shape)
+
+        # Draw the grid on the image
+        image_with_grid, horizontal_lines, vertical_lines = chess_utils.draw_infinite_grid(image, grid)
+
+        # Display the result
+        st.image(image_with_grid, caption="Detected Chessboard Grid", use_column_width=True)
+
+    if piece_detections is None or len(piece_detections) == 0:
         st.error("⚠️ No chess pieces detected.")
+    else:
+        st.success("✅ Chess pieces detected!")
 
     st.write("✅ Processing Complete!")
 
