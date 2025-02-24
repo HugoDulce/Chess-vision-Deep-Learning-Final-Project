@@ -459,8 +459,8 @@ def df_to_fen(df):
 
 def load_models():
     # Correct paths based on your git ls-files output
-    board_model_path = "runs/detect_board/train/best.pt"
-    piece_model_path = "runs/detect_pieces/train/best.pt"
+    board_model_path = "runs/detect_board/train14/weights/best.pt"
+    piece_model_path = "runs/detect_pieces/train10/weights/best.pt"
 
     # Ensure the files exist before loading
     if not os.path.exists(board_model_path):

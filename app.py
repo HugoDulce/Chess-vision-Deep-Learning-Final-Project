@@ -31,6 +31,7 @@ if uploaded_file is not None:
     # Detect the Chessboard
     st.write("🔄 Detecting chessboard...")
     board_results = board_model(image)
+    print(board_results)
 
     # Detect Chess Pieces
     st.write("🔄 Detecting chess pieces...")
