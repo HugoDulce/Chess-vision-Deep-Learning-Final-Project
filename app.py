@@ -4,9 +4,25 @@ import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 #import chess_utils  # Ensure this file is in the same directory
-import sys
+# Debug
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # Ensure current directory is in the path
+import streamlit as st
+
+# List all files in the working directory
+files = os.listdir(".")
+st.write("📂 Available files in the current directory:", files)
+
+# Get absolute path of chess_utils.py
+chess_utils_path = os.path.abspath("chess_utils.py")
+st.write(f"🛠 Absolute path of chess_utils.py: {chess_utils_path}")
+
+# Check if the file exists
+if os.path.exists(chess_utils_path):
+    st.success("✅ chess_utils.py exists in the expected location!")
+else:
+    st.error("⚠️ chess_utils.py is missing or in the wrong directory!")
+
+# Debug
 #import chess_utils  # Now try to import again
 
 print("✅ chess_utils.py found and imported successfully!")
