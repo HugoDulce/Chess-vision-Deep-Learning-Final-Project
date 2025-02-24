@@ -4,6 +4,16 @@ import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 import chess_utils  # Ensure this file is in the same directory
+import os
+import streamlit as st
+
+st.write("📂 Listing Files in Streamlit Cloud:")
+
+# Get list of files in the working directory
+files = os.listdir()
+
+# Display files in Streamlit
+st.write(files)
 
 # Load YOLO models
 st.write("🔄 Loading YOLO models...")

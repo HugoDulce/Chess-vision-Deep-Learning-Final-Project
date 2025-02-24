@@ -5,7 +5,6 @@ from sklearn.cluster import KMeans
 import numpy as np
 from ultralytics import YOLO
 from scipy.interpolate import griddata
-
 def complete_grid(crossings, image_shape):
     """
     Ensures that the detected chessboard intersections form a complete 7x7 grid.
