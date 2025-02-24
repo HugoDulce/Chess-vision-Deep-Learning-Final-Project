@@ -17,6 +17,7 @@ except FileNotFoundError as e:
 # Streamlit App Title
 st.title("♟️ Chess Board & Piece Detection")
 
+
 # Upload Image (ONLY ONCE)
 uploaded_file = st.file_uploader("📂 Upload a Chessboard Image", type=["jpg", "png", "jpeg"])
 
