@@ -4,10 +4,10 @@ import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 #import chess_utils  # Ensure this file is in the same directory
-import os
-import streamlit as st
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # Ensure current directory is in the path
+import chess_utils  # Now try to import again
 
-st.write("📂 Listing Files in Streamlit Cloud:")
+print("✅ chess_utils.py found and imported successfully!")
 
 # Get list of files in the working directory
 files = os.listdir()
