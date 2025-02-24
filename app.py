@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
-import chess_utils  # Ensure this file is in the same directory
+#import chess_utils  # Ensure this file is in the same directory
 import os
 import streamlit as st
 
