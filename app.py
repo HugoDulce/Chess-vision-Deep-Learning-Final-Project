@@ -5,22 +5,21 @@ from PIL import Image
 from ultralytics import YOLO
 #import chess_utils  # Ensure this file is in the same directory
 # Debug
+# Debug imports
 import os
-import streamlit as st
+import sys
 
-# List all files in the working directory
-files = os.listdir(".")
-st.write("📂 Available files in the current directory:", files)
+# Ensure the script's directory is in `sys.path`
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(script_dir)
 
-# Get absolute path of chess_utils.py
-chess_utils_path = os.path.abspath("chess_utils.py")
-st.write(f"🛠 Absolute path of chess_utils.py: {chess_utils_path}")
-
-# Check if the file exists
-if os.path.exists(chess_utils_path):
-    st.success("✅ chess_utils.py exists in the expected location!")
-else:
-    st.error("⚠️ chess_utils.py is missing or in the wrong directory!")
+# Now try to import `chess_utils`
+try:
+    import chess_utils
+    st.success("✅ Successfully imported chess_utils!")
+except ModuleNotFoundError as e:
+    st.error(f"⚠️ Import Error: {e}")
+    st.stop()
 
 # Debug
 #import chess_utils  # Now try to import again
@@ -38,13 +37,12 @@ st.write("🔄 Loading YOLO models...")
 try:
     board_model, piece_model = chess_utils.load_models()
     st.success("✅ Models loaded successfully!")
+except AttributeError:
+    st.error("⚠️ `load_models()` function not found in chess_utils.py. Check its definition.")
+    st.stop()
 except FileNotFoundError as e:
     st.error(f"⚠️ Model file missing: {e}")
     st.stop()
-
-# Streamlit App Title
-st.title("♟️ Chess Board & Piece Detection")
-
 
 # Upload Image (ONLY ONCE)
 uploaded_file = st.file_uploader("📂 Upload a Chessboard Image", type=["jpg", "png", "jpeg"])
