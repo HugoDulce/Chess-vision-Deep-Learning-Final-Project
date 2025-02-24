@@ -7,7 +7,7 @@ from ultralytics import YOLO
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # Ensure current directory is in the path
-import chess_utils  # Now try to import again
+#import chess_utils  # Now try to import again
 
 print("✅ chess_utils.py found and imported successfully!")
 
