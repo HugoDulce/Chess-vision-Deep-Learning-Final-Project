@@ -26,16 +26,45 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file)
     image = np.array(image)  # Convert to NumPy array for OpenCV processing
 
+    # Ensure 3-channel RGB format
+    if image.ndim == 2:  # Grayscale image
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    elif image.shape[2] == 4:  # RGBA image
+        image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
+    
+    st.image(image, caption="📷 Uploaded Image", use_column_width=True)
+
+# Upload Image
+uploaded_file = st.file_uploader("📂 Upload a Chessboard Image", type=["jpg", "png", "jpeg"])
+
+if uploaded_file is not None:
+    # Convert to OpenCV image format
+    image = Image.open(uploaded_file)
+    image = np.array(image)  # Convert to NumPy array for OpenCV processing
+
+    # Ensure 3-channel RGB format
+    if image.ndim == 2:  # Grayscale image
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    elif image.shape[2] == 4:  # RGBA image
+        image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
+
     st.image(image, caption="📷 Uploaded Image", use_column_width=True)
 
     # Detect the Chessboard
     st.write("🔄 Detecting chessboard...")
-    board_results = board_model(image)
-    print(board_results)
+    try:
+        board_results = board_model.predict(image)
+    except Exception as e:
+        st.error(f"⚠️ Error detecting chessboard: {e}")
+        st.stop()
 
     # Detect Chess Pieces
     st.write("🔄 Detecting chess pieces...")
-    piece_results = piece_model(image)
+    try:
+        piece_results = piece_model.predict(image)
+    except Exception as e:
+        st.error(f"⚠️ Error detecting chess pieces: {e}")
+        st.stop()
 
     # Debugging Output
     st.write("📝 Board Detections:", board_results)
